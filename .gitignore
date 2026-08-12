@@ -1,0 +1,22 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+*.log
+
+# Secrets — never commit
+.secrets/
+*.key
+*.pem
+.env
+
+# Editor
+.vscode/
+.idea/
+
+# Local scratch
+tmp/
+_archive*/
+__pycache__
