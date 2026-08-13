@@ -11,6 +11,17 @@ teams. It is built from four layers that reinforce each other:
 G0 (context assembly) → G1–G4 (task discipline) → KPI (accountability) → gate_control (machine enforcement)
 ```
 
+## Try it in 30 seconds / 30 秒试用
+
+```bash
+git clone https://github.com/kongminOS/agent-gates.git
+cd agent-gates/gate_control
+python test_gate_guard.py     # 6 contract tests — watch the gates refuse a skipped task
+python test_gate_evidence.py  # end-to-end: skip the gate -> blocked; pass G3 -> released
+```
+
+No dependencies, Python ≥3.10. If a gate can be skipped, it is not a gate — these tests are the proof.
+
 | Layer | What it owns | Where |
 |---|---|---|
 | **G0** | Session-opening context quality: the system picks the right tier (lite/standard/heavy), verifies it actually loaded, and degrades gracefully when the context budget is low | **[kongminOS/g0-gate](https://github.com/kongminOS/g0-gate)** (BSL 1.1) |
