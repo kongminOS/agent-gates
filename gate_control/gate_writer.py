@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-gate_writer.py -- G1-G4 gate state writer (single write entry for gate state)
+gate_writer.py -- G1-G6 gate state writer (single write entry for gate state)
 
 Principles:
   - "Did the agent pass the gate?" changes from "ask the agent" to "check the file":
@@ -8,12 +8,16 @@ Principles:
   - This script is the ONLY entry allowed to write gate_state; other scripts/agents read only.
   - G1 pass REQUIRES --confirm (external human y/n). An agent cannot self-approve its own
     G1 -- if it could, the gate would be theater.
+  - G5 (review) pass requires a review reference; new G4 evidence after G5 invalidates
+    the review (edits after review => must re-review).
+  - G6 (verify) pass REQUIRES --verdict proven. "I claim it's done" without a proven
+    per-dimension verification is exactly what this gate exists to prevent.
   - Phase 1 deliberately has no cryptographic signing; it uses "directory-exclusive write +
     structure validation" as a pragmatic start. Upgrade path: sign each state file.
 
 Usage:
   gate_writer.py init  --task-id <id> [--summary "..." ] [--force]
-  gate_writer.py pass  --task-id <id> --gate G1|G2|G3|G4 --ref "artifact ref" [--by user|agent] [--confirm]
+  gate_writer.py pass  --task-id <id> --gate G1|G2|G3|G4|G5|G6 --ref "artifact ref" [--by user|agent] [--confirm] [--verdict proven]
   gate_writer.py show  --task-id <id>
   gate_writer.py list
 
@@ -29,7 +33,8 @@ STATE_DIR = os.environ.get(
     "GATE_STATE_DIR",
     os.path.join(os.path.expanduser("~"), ".gate_state"),
 )
-GATE_ORDER = ["G1", "G2", "G3", "G4"]
+GATE_ORDER = ["G1", "G2", "G3", "G4", "G5", "G6"]
+VALID_VERDICTS = ["proven"]
 
 
 def _now():
@@ -50,6 +55,8 @@ def _new(task_id, summary):
             "G2": {"passed": False, "timestamp": None, "spec_ref": None},
             "G3": {"passed": False, "timestamp": None, "ticket_ref": None},
             "G4": {"passed": False, "timestamp": None, "evidence_ref": None},
+            "G5": {"passed": False, "timestamp": None, "review_ref": None, "findings": 0},
+            "G6": {"passed": False, "timestamp": None, "verify_ref": None, "verdict": None},
         },
         "current_gate": "G1",
         "locked": False,
@@ -90,6 +97,12 @@ def cmd_pass(args):
     if gate == "G1" and not args.confirm:
         print("ERROR: G1 pass requires --confirm (external user y/n). Agent cannot self-approve G1.")
         return 2
+    # G6 requires a proven verification verdict -- "I claim done" is not proof.
+    if gate == "G6":
+        if args.verdict not in VALID_VERDICTS:
+            print(f"ERROR: G6 pass requires --verdict proven (got {args.verdict or 'none'}); "
+                  f"challenged/unverified deliveries must not pass the gate.")
+            return 2
     by = args.by or ("user" if gate == "G1" else "agent")
     if gate == "G1":
         g.update({"passed": True, "timestamp": _now(), "summary": args.ref, "confirmed_by": by})
@@ -99,6 +112,17 @@ def cmd_pass(args):
         g.update({"passed": True, "timestamp": _now(), "ticket_ref": args.ref})
     elif gate == "G4":
         g.update({"passed": True, "timestamp": _now(), "evidence_ref": args.ref})
+        # New implementation evidence after a review invalidates the review:
+        # edits after review => the review must be re-run (G5 resets).
+        g5 = st["gates"].get("G5", {})
+        if g5.get("passed"):
+            g5.update({"passed": False, "timestamp": None, "review_ref": None, "findings": 0})
+            print("NOTE: G4 evidence updated after G5 review -> G5 invalidated, re-review required.")
+    elif gate == "G5":
+        g.update({"passed": True, "timestamp": _now(), "review_ref": args.ref,
+                  "findings": max(0, args.findings or 0)})
+    elif gate == "G6":
+        g.update({"passed": True, "timestamp": _now(), "verify_ref": args.ref, "verdict": args.verdict})
     idx = GATE_ORDER.index(gate)
     st["current_gate"] = GATE_ORDER[idx + 1] if idx + 1 < len(GATE_ORDER) else "DONE"
     with open(p, "w", encoding="utf-8") as f:
@@ -135,7 +159,7 @@ def cmd_list(args):
 
 
 def main():
-    ap = argparse.ArgumentParser(prog="gate_writer", description="G1-G4 gate state writer (single write entry)")
+    ap = argparse.ArgumentParser(prog="gate_writer", description="G1-G6 gate state writer (single write entry)")
     sub = ap.add_subparsers(dest="cmd", required=True)
     p_init = sub.add_parser("init")
     p_init.add_argument("--task-id", required=True)
@@ -147,6 +171,8 @@ def main():
     p_pass.add_argument("--ref", default="")
     p_pass.add_argument("--by", default=None)
     p_pass.add_argument("--confirm", action="store_true")
+    p_pass.add_argument("--findings", type=int, default=0)
+    p_pass.add_argument("--verdict", default=None)
     p_show = sub.add_parser("show")
     p_show.add_argument("--task-id", required=True)
     p_list = sub.add_parser("list")
@@ -157,3 +183,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
