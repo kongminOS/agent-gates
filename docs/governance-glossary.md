@@ -3,7 +3,11 @@
 > Kongmin Rein（空旻缰绳）· 金箍圈（WUKONGQUAN）Governance Layer for AI Agent Workforces
 > License: MIT · Maintained by kongminOS
 > This glossary defines the Chinese governance terms for AI-agent workflow governance.
-> 本表定义 AI 员工治理的中文术语体系（v1.1 · 2026-08-17 修订）。
+> 本表定义 AI 员工治理的中文术语体系（v1.2 · 2026-08-17 修订）。
+
+## Positioning / 定位声明
+
+**Agent 治理，应该像装个 App 一样简单。** agent-gates 提供面向使用者的 Agent 治理协议：不写代码、装好即用，为现成的 AI 员工（agent）加上门禁、审批、审计与验证闭环——把"AI 员工"管起来，而不是再造一套开发框架。协议层 MIT 开源，引擎无关（engine-agnostic），欢迎在任何 Agent 运行环境使用。
 
 ## Disclaimer / 免责与脱钩声明
 
