@@ -40,7 +40,7 @@ G1–G4 方法论受 **Matt Pocock 的生产级 Skill 体系**启发并汉化落
 
 | 文档 | 内容 |
 |------|------|
-| [docs/G0-gate-spec.md](docs/G0-gate-spec.md) | G0 开工闸门完整工程规格（分档模型/自检闭环/域路由/Enforcement 三层） |
+| [kongminOS/g0-gate · G0 规格（BSL 1.1）](https://github.com/kongminOS/g0-gate) | G0 开工闸门完整工程规格（分档模型/自检闭环/域路由/Enforcement 三层） |
 | [docs/G1-G6.md](docs/G1-G6.md) | G1-G6 任务纪律闸门完整规格（盘问/规格/工单/实现/审查/验证 + 机器检查） |
 | [docs/KPI-board.md](docs/KPI-board.md) | KPI 看板"编制状态"三维度设计（编制内/临时/已除名） |
 
