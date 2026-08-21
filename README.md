@@ -44,6 +44,11 @@ G1–G4 方法论受 **Matt Pocock 的生产级 Skill 体系**启发并汉化落
 | [docs/G1-G6.md](docs/G1-G6.md) | G1-G6 任务纪律闸门完整规格（盘问/规格/工单/实现/审查/验证 + 机器检查） |
 | [docs/KPI-board.md](docs/KPI-board.md) | KPI 看板"编制状态"三维度设计（编制内/临时/已除名） |
 
+
+## 国内镜像（Gitee）
+
+- 国内镜像仓库：https://gitee.com/kongminos/agent-gates （免代理，国内下载/克隆更快）
+- GitHub 原仓：https://github.com/kongminOS/agent-gates
 ## 快速开始
 
 ```bash
